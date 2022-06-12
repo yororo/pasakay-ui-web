@@ -8,35 +8,36 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import CarpoolSearchPage from "./components/carpool/CarpoolSearchPage";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import BookingPage from "./components/booking/BookingPage";
+import { Auth0Provider } from "@auth0/auth0-react";
+import LoginButton from "./components/auth/LoginButton";
+import Profile from "./components/auth/Profile";
+import App from "./App";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <div>
-      <Navbar bg="dark" variant="dark" className="px-3">
-        <Navbar.Brand href="/">🚗 Pasakay</Navbar.Brand>
-        <Nav className="me-auto">
-          <Nav.Link href="/carpools">Carpools</Nav.Link>
-          <Nav.Link href="/bookings">My Bookings</Nav.Link>
-        </Nav>
+  <Auth0Provider
+    domain={process.env.REACT_APP_AUTH_CLIENT_DOMAIN}
+    clientId={process.env.REACT_APP_AUTH_CLIENT_ID}
+    redirectUri={window.location.origin}
+  >
+    <React.StrictMode>
+      <div>
+        <Navbar bg="dark" variant="dark" className="px-3">
+          <Navbar.Brand href="/">🚗 Pasakay</Navbar.Brand>
+          <Nav className="me-auto">
+            <Nav.Link href="/carpools">Carpools</Nav.Link>
+            <Nav.Link href="/bookings">My Bookings</Nav.Link>
+          </Nav>
 
-        <Navbar.Collapse className="justify-content-end">
-          <Navbar.Text>
-            👩‍🦰 <a href="/login">Sheena</a>
-          </Navbar.Text>
-        </Navbar.Collapse>
-      </Navbar>
-    </div>
-
-    <Container className="mt-4">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<CarpoolSearchPage />} />
-          <Route path="carpools" element={<CarpoolSearchPage />} />
-          <Route path="bookings" element={<BookingPage />} />
-        </Routes>
-      </BrowserRouter>
-    </Container>
-  </React.StrictMode>,
+          <Navbar.Collapse className="justify-content-end">
+            <Navbar.Text>
+              <LoginButton />
+            </Navbar.Text>
+          </Navbar.Collapse>
+        </Navbar>
+      </div>
+      <App />
+    </React.StrictMode>
+  </Auth0Provider>,
   document.getElementById("root")
 );
 
