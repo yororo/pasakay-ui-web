@@ -1,18 +1,14 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { Button, Card } from "react-bootstrap";
-import { getCarpools, bookCarpool } from "../../apiService/coreApi";
+import { Button, Card, Modal } from "react-bootstrap";
+import { getCarpoolsByDriverId } from "../../apiService/coreApi";
 
-import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-const CarpoolSearchList = () => {
+const MyCarpoolsList = () => {
   const { user } = useAuth0();
   const [carpools, setCarpools] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [carpoolToBook, setCarpoolToBook] = useState({});
+  const [carpoolToDelete, setCarpoolToBook] = useState({});
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -23,43 +19,38 @@ const CarpoolSearchList = () => {
     setCarpoolToBook(carpool);
   };
 
-  const onBookClick = async () => {
-    try {
-      console.log(`Booking carpool ${carpoolToBook?.carpoolName}`);
-      await bookCarpool(carpoolToBook, {
-        userId: user.sub,
-        name: user.name,
-      });
-      await loadCarpools();
-      toast.success(`You're now booked at ${carpoolToBook?.carpoolName} 🔥`);
-    } catch (err) {
-      toast.error(`Booking failed for ${carpoolToBook?.carpoolName} 😧`);
-      console.log(
-        `Booking carpool ${carpoolToBook?.carpoolName} failed! ${err}`
-      );
-    } finally {
-      setShowModal(false);
-    }
-  };
-
   const loadCarpools = async () => {
     try {
-      const carpools = await getCarpools();
-      const filteredCarpools = carpools.filter((carpool) => {
-        console.log(carpool.registeredPassengers);
-        return !carpool.registeredPassengers.some(
-          (passenger) => passenger.passengerId === user.sub
-        );
-      });
-      setCarpools(filteredCarpools);
+      const carpools = await getCarpoolsByDriverId(user.sub);
+      setCarpools(carpools);
+      console.log(carpools);
     } catch (err) {
-      alert("Loading carpools failed" + err);
+      alert("Loading my carpools failed" + err);
     }
   };
 
-  useEffect(() => {
-    loadCarpools();
-  }, []);
+  const displayModal = () => {
+    return (
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Booking</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <p>Are you sure you want to cancel this carpool?</p>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => {}}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => {}}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  };
 
   const displayCardList = () => {
     return carpools.map((carpool) => {
@@ -94,11 +85,11 @@ const CarpoolSearchList = () => {
                 </span>
               </Card.Text>
               <Button
-                variant="primary"
+                variant="danger"
                 type="button"
                 onClick={() => handleShowModal(carpool)}
               >
-                Book
+                Cancel
               </Button>
             </Card.Body>
           </Card>
@@ -106,20 +97,17 @@ const CarpoolSearchList = () => {
       );
     });
   };
+
+  useEffect(() => {
+    loadCarpools();
+  }, []);
+
   return (
     <div>
+      {displayModal()}
       {displayCardList()}
-
-      <ConfirmationDialogSimple
-        showModal={showModal}
-        onCancelClick={handleCloseModal}
-        onConfirmClick={onBookClick}
-        title="Confirm Booking"
-        body="Are you sure you want to book this carpool?"
-      />
-      <ToastContainer />
     </div>
   );
 };
 
-export default CarpoolSearchList;
+export default MyCarpoolsList;

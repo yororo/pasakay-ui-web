@@ -1,9 +1,17 @@
 import { handleResponse, handleError } from "./apiUtils";
-const baseUrl = process.env.REACT_APP_API_URL + "/carpools/";
+const baseUrl = process.env.REACT_APP_API_URL + "/carpools";
 
 export async function getCarpools() {
   console.log(baseUrl);
   return await fetch(baseUrl).then(handleResponse).catch(handleError);
+}
+
+export async function getCarpoolsByDriverId(driverId) {
+  console.log(baseUrl);
+  // WARN: improve security?
+  return await fetch(`${baseUrl}?driverId=${driverId}`)
+    .then(handleResponse)
+    .catch(handleError);
 }
 
 export async function getBookings(userId) {
@@ -30,8 +38,24 @@ export function bookCarpool(carpool, user) {
     ],
   };
 
-  return fetch(`${baseUrl}${carpool.carpoolId}`, {
+  return fetch(`${baseUrl}/${carpool.carpoolId}`, {
     method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  })
+    .then(handleResponse)
+    .catch(handleError);
+}
+
+export function createNewCarpool(carpool, user) {
+  const body = {
+    ...carpool,
+    driverName: user.name,
+    driverId: user.userId,
+  };
+
+  return fetch(`${baseUrl}`, {
+    method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   })

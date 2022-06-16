@@ -7,7 +7,7 @@ const usersMock = [
   {
     userId: "195f777f-b2e4-42ee-a1be-7a5dda224546",
     name: "Joshua Sobejana",
-    userPhoneNumber: "09959775452",
+    phoneNumber: "09959775452",
   },
   {
     userId: "c60a112f-1e20-4830-9fc4-1e02f25f5d6e",

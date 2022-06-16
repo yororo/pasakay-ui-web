@@ -1,13 +1,17 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button, Spinner } from "react-bootstrap";
 import LogoutButton from "./LogoutButton";
 
 const LoginButton = () => {
   const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
 
   if (isLoading) {
-    return <div>Loading ...</div>;
+    return (
+      <Spinner animation="border" role="status">
+        <span className="visually-hidden">Loading...</span>
+      </Spinner>
+    );
   }
 
   const displayLoginButton = () => {

@@ -2,9 +2,11 @@ import moment from "moment";
 import { Button, Card, Modal } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { getBookings } from "../../apiService/coreApi";
-import usersMock from "../../data/userMock";
+import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
+import { useAuth0 } from "@auth0/auth0-react";
 
 const BookingList = () => {
+  const { user } = useAuth0();
   const [bookings, setBookings] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState({});
@@ -19,13 +21,13 @@ const BookingList = () => {
   };
 
   const loadBookings = async () => {
-    const bookings = await getBookings(usersMock[0].userId);
+    const bookings = await getBookings(user.sub);
     setBookings(bookings);
   };
 
   const onBookClick = async () => {
     try {
-      console.log(`Deleting booking ${bookingToDelete?.carpoolName}`);
+      console.log(`TODO: Delete booking ${bookingToDelete?.carpoolName}`);
     } catch (err) {
       console.log(
         `Deleting booking ${bookingToDelete?.carpoolName} failed! ${err}`
@@ -37,29 +39,6 @@ const BookingList = () => {
   useEffect(() => {
     loadBookings();
   }, []);
-
-  const displayModal = () => {
-    return (
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <p>Are you sure you want to delete this booking?</p>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={onBookClick}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  };
 
   const displayBookings = () => {
     return bookings.map((booking) => {
@@ -94,7 +73,7 @@ const BookingList = () => {
                 </span>
               </Card.Text>
               <Button
-                variant="primary"
+                variant="danger"
                 type="button"
                 onClick={() => handleShowModal(booking)}
               >
@@ -110,7 +89,14 @@ const BookingList = () => {
   return (
     <div>
       {displayBookings()}
-      {displayModal()}
+
+      <ConfirmationDialogSimple
+        showModal={showModal}
+        onCancelClick={handleCloseModal}
+        onConfirmClick={onBookClick}
+        title="Confirm Delete"
+        body="Are you sure you want to delete this booking?"
+      />
     </div>
   );
 };
