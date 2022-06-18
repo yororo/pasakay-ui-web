@@ -25,7 +25,7 @@ const BookingList = () => {
       console.log(`TODO: Delete booking ${bookingToDelete?.carpoolName}`);
     } catch (err) {
       console.log(
-        `Deleting booking ${bookingToDelete?.carpoolName} failed! ${err}`
+        `Deleting booking ${bookingToDelete?.carpoolName} failed! Error: ${err}`
       );
     } finally {
       setShowModal(false);
