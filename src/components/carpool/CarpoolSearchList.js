@@ -58,8 +58,23 @@ const CarpoolSearchList = () => {
   };
 
   useEffect(() => {
-    loadCarpools();
-  }, []);
+    // TODO: this is the same with loadCarpools. Just to avoid the ESLint warning for now :|
+    const loadData = async () => {
+      try {
+        const carpools = await getCarpools();
+        const filteredCarpools = carpools.filter((carpool) => {
+          console.log(carpool.registeredPassengers);
+          return !carpool.registeredPassengers.some(
+            (passenger) => passenger.passengerId === user.sub
+          );
+        });
+        setCarpools(filteredCarpools);
+      } catch (err) {
+        alert("Loading carpools failed" + err);
+      }
+    };
+    loadData();
+  }, [user.sub]);
 
   const displayCardList = () => {
     return carpools.map((carpool) => {

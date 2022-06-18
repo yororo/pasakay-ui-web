@@ -1,5 +1,5 @@
 import moment from "moment";
-import { Button, Card, Modal } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { getBookings } from "../../apiService/coreApi";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
@@ -20,11 +20,6 @@ const BookingList = () => {
     setBookingToDelete(booking);
   };
 
-  const loadBookings = async () => {
-    const bookings = await getBookings(user.sub);
-    setBookings(bookings);
-  };
-
   const onBookClick = async () => {
     try {
       console.log(`TODO: Delete booking ${bookingToDelete?.carpoolName}`);
@@ -37,8 +32,12 @@ const BookingList = () => {
     }
   };
   useEffect(() => {
-    loadBookings();
-  }, []);
+    const loadData = async () => {
+      const bookings = await getBookings(user.sub);
+      setBookings(bookings);
+    };
+    loadData();
+  }, [user.sub]);
 
   const displayBookings = () => {
     return bookings.map((booking) => {

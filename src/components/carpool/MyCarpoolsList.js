@@ -13,21 +13,22 @@ const MyCarpoolsList = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setCarpoolToBook({});
+    console.log(carpoolToDelete);
   };
   const handleShowModal = (carpool) => {
     setShowModal(true);
     setCarpoolToBook(carpool);
   };
 
-  const loadCarpools = async () => {
-    try {
-      const carpools = await getCarpoolsByDriverId(user.sub);
-      setCarpools(carpools);
-      console.log(carpools);
-    } catch (err) {
-      alert("Loading my carpools failed" + err);
-    }
-  };
+  // const loadCarpools = async () => {
+  //   try {
+  //     const carpools = await getCarpoolsByDriverId(user.sub);
+  //     setCarpools(carpools);
+  //     console.log(carpools);
+  //   } catch (err) {
+  //     alert("Loading my carpools failed" + err);
+  //   }
+  // };
 
   const displayModal = () => {
     return (
@@ -99,8 +100,17 @@ const MyCarpoolsList = () => {
   };
 
   useEffect(() => {
-    loadCarpools();
-  }, []);
+    const loadData = async () => {
+      try {
+        const carpools = await getCarpoolsByDriverId(user.sub);
+        setCarpools(carpools);
+        console.log(carpools);
+      } catch (err) {
+        alert("Loading my carpools failed" + err);
+      }
+    };
+    loadData();
+  }, [user.sub]);
 
   return (
     <div>
