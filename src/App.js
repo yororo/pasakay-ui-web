@@ -8,6 +8,7 @@ import Home from "./components/home/Home";
 import { LinkContainer } from "react-router-bootstrap";
 import Profile from "./components/user/Profile";
 import NavUserProfile from "./components/nav/NavUserProfile";
+import About from "./components/home/About";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
             path="/profile"
             element={<ProtectedRoute component={Profile} />}
           />
+          <Route path="/about" element={<About />} />
         </Routes>
       </Container>
     </>
