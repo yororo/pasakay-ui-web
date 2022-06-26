@@ -1,56 +1,55 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { Button, Card, Modal } from "react-bootstrap";
-import { getCarpoolsByDriverId } from "../../apiService/coreApi";
+import { Button, Card } from "react-bootstrap";
+import { deleteCarpool, getCarpoolsByDriverId } from "../../apiService/coreApi";
+import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MyCarpoolsList = () => {
   const { user } = useAuth0();
   const [carpools, setCarpools] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [carpoolToDelete, setCarpoolToBook] = useState({});
+  const [carpoolToDelete, setCarpoolToDelete] = useState({});
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setCarpoolToBook({});
+    setCarpoolToDelete({});
     console.log(carpoolToDelete);
   };
   const handleShowModal = (carpool) => {
     setShowModal(true);
-    setCarpoolToBook(carpool);
+    setCarpoolToDelete(carpool);
   };
 
-  // const loadCarpools = async () => {
-  //   try {
-  //     const carpools = await getCarpoolsByDriverId(user.sub);
-  //     setCarpools(carpools);
-  //     console.log(carpools);
-  //   } catch (err) {
-  //     alert("Loading my carpools failed" + err);
-  //   }
-  // };
+  const onDeleteCarpoolClick = async () => {
+    try {
+      console.log(
+        `Deleting carpool ${carpoolToDelete?.carpoolName} - ${user.sub}:${user.name}`
+      );
+      await deleteCarpool(carpoolToDelete.carpoolId);
+      toast.success(`Carpool deleted 👍`);
+    } catch (err) {
+      toast.error(`Deleting carpool failed 😧`);
+      console.log(
+        `Deleting carpool for ${carpoolToDelete?.carpoolName} failed! Error: ${err}`
+      );
+    } finally {
+      setShowModal(false);
+    }
 
-  const displayModal = () => {
-    return (
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Booking</Modal.Title>
-        </Modal.Header>
+    await loadCarpools();
+  };
 
-        <Modal.Body>
-          <p>Are you sure you want to cancel this carpool?</p>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => {}}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={() => {}}>
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    );
+  const loadCarpools = async () => {
+    try {
+      const carpools = await getCarpoolsByDriverId(user.sub);
+      setCarpools(carpools);
+      console.log(carpools);
+    } catch (err) {
+      alert("Loading my carpools failed" + err);
+    }
   };
 
   const displayCardList = () => {
@@ -104,7 +103,6 @@ const MyCarpoolsList = () => {
       try {
         const carpools = await getCarpoolsByDriverId(user.sub);
         setCarpools(carpools);
-        console.log(carpools);
       } catch (err) {
         alert("Loading my carpools failed" + err);
       }
@@ -114,8 +112,15 @@ const MyCarpoolsList = () => {
 
   return (
     <div>
-      {displayModal()}
+      <ConfirmationDialogSimple
+        showModal={showModal}
+        onCancelClick={handleCloseModal}
+        onConfirmClick={onDeleteCarpoolClick}
+        title="Confirm Delete"
+        body="Are you sure you want to delete this carpool?"
+      />
       {displayCardList()}
+      <ToastContainer />
     </div>
   );
 };
