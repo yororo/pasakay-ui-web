@@ -26,16 +26,19 @@ export async function getBookings(userId) {
 }
 
 export function bookCarpool(carpool, user) {
+  const newPassengers = [
+    ...carpool.registeredPassengers,
+    {
+      passengerId: user.userId,
+      passengerName: user.name,
+      passengerNumber: user.phoneNumber,
+    },
+  ];
+  const newStatus =
+    newPassengers.length >= carpool.vehicleCapacity ? "Full" : "Open";
   const body = {
-    status: "Booked",
-    registeredPassengers: [
-      ...carpool.registeredPassengers,
-      {
-        passengerId: user.userId,
-        passengerName: user.name,
-        passengerNumber: user.phoneNumber,
-      },
-    ],
+    status: newStatus,
+    registeredPassengers: newPassengers,
   };
 
   return fetch(`${baseUrl}/${carpool.carpoolId}`, {
@@ -63,8 +66,31 @@ export function createNewCarpool(carpool, user) {
     .catch(handleError);
 }
 
-// export function deleteCourse(courseId) {
-//   return fetch(baseUrl + courseId, { method: "DELETE" })
-//     .then(handleResponse)
-//     .catch(handleError);
-// }
+export function deleteBooking(carpool, user) {
+  const newPassengers = carpool.registeredPassengers.filter(
+    (passenger) => passenger.passengerId !== user.userId
+  );
+
+  const newStatus = carpool.status === "Full" ? "Open" : carpool.status;
+
+  const body = {
+    status: newStatus,
+    registeredPassengers: newPassengers,
+  };
+
+  return fetch(`${baseUrl}/${carpool.carpoolId}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  })
+    .then(handleResponse)
+    .catch(handleError);
+}
+
+export function deleteCarpool(carpoolId) {
+  return fetch(`${baseUrl}/${carpoolId}`, {
+    method: "DELETE",
+  })
+    .then(handleResponse)
+    .catch(handleError);
+}

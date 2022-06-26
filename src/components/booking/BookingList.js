@@ -1,9 +1,11 @@
 import moment from "moment";
 import { Button, Card } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import { getBookings } from "../../apiService/coreApi";
+import { deleteBooking, getBookings } from "../../apiService/coreApi";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
 import { useAuth0 } from "@auth0/auth0-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const BookingList = () => {
   const { user } = useAuth0();
@@ -20,15 +22,27 @@ const BookingList = () => {
     setBookingToDelete(booking);
   };
 
-  const onBookClick = async () => {
+  const onDeleteBookingClick = async () => {
     try {
-      console.log(`TODO: Delete booking ${bookingToDelete?.carpoolName}`);
-    } catch (err) {
       console.log(
-        `Deleting booking ${bookingToDelete?.carpoolName} failed! Error: ${err}`
+        `Booking cancellation for ${bookingToDelete?.carpoolName} - ${user.sub}:${user.name}`
+      );
+      await deleteBooking(bookingToDelete, { userId: user.sub });
+      toast.success(`Booking cancelled 👍`);
+    } catch (err) {
+      toast.error(`Booking cancellation failed 😧`);
+      console.log(
+        `Booking cancellation for ${bookingToDelete?.carpoolName} failed! Error: ${err}`
       );
     } finally {
       setShowModal(false);
+    }
+
+    try {
+      const bookings = await getBookings(user.sub);
+      setBookings(bookings);
+    } catch (err) {
+      console.log(`Error when loading bookings after a cancellation: ${err}`);
     }
   };
   useEffect(() => {
@@ -92,10 +106,11 @@ const BookingList = () => {
       <ConfirmationDialogSimple
         showModal={showModal}
         onCancelClick={handleCloseModal}
-        onConfirmClick={onBookClick}
-        title="Confirm Delete"
-        body="Are you sure you want to delete this booking?"
+        onConfirmClick={onDeleteBookingClick}
+        title="Confirm Cancellation"
+        body="Are you sure you want to cancel this booking?"
       />
+      <ToastContainer />
     </div>
   );
 };
