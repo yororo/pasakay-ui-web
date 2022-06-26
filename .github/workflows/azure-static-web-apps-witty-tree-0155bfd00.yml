@@ -31,6 +31,11 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "build" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+        env:
+          REACT_APP_ENV: "DEV"
+          REACT_APP_API_URL: "https://pasakay-core-api-dev.azurewebsites.net/api"
+          REACT_APP_AUTH_CLIENT_DOMAIN: "pasakay-dev.jp.auth0.com"
+          REACT_APP_AUTH_CLIENT_ID: "AMWZ5EJYHZyr8aHcf5FLNNbu9hIApRR5"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
