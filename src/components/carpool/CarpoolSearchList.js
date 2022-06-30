@@ -1,81 +1,7 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
 import { Button, Card } from "react-bootstrap";
-import { getCarpools, bookCarpool } from "../../apiService/coreApi";
 
-import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-const CarpoolSearchList = () => {
-  const { user } = useAuth0();
-  const [carpools, setCarpools] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [carpoolToBook, setCarpoolToBook] = useState({});
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setCarpoolToBook({});
-  };
-  const handleShowModal = (carpool) => {
-    setShowModal(true);
-    setCarpoolToBook(carpool);
-  };
-
-  const onBookClick = async () => {
-    try {
-      console.log(`Booking carpool ${carpoolToBook?.carpoolName}`);
-      await bookCarpool(carpoolToBook, {
-        userId: user.sub,
-        name: user.name,
-      });
-      await loadCarpools();
-      toast.success(`You're now booked at ${carpoolToBook?.carpoolName} 🔥`);
-    } catch (err) {
-      toast.error(`Booking failed for ${carpoolToBook?.carpoolName} 😧`);
-      console.log(
-        `Booking carpool ${carpoolToBook?.carpoolName} failed! ${err}`
-      );
-    } finally {
-      setShowModal(false);
-    }
-  };
-
-  const loadCarpools = async () => {
-    try {
-      const carpools = await getCarpools();
-      const filteredCarpools = carpools.filter((carpool) => {
-        console.log(carpool.registeredPassengers);
-        return !carpool.registeredPassengers.some(
-          (passenger) => passenger.passengerId === user.sub
-        );
-      });
-      setCarpools(filteredCarpools);
-    } catch (err) {
-      alert("Loading carpools failed" + err);
-    }
-  };
-
-  useEffect(() => {
-    // TODO: this is the same with loadCarpools. Just to avoid the ESLint warning for now :|
-    const loadData = async () => {
-      try {
-        const carpools = await getCarpools();
-        const filteredCarpools = carpools.filter((carpool) => {
-          console.log(carpool.registeredPassengers);
-          return !carpool.registeredPassengers.some(
-            (passenger) => passenger.passengerId === user.sub
-          );
-        });
-        setCarpools(filteredCarpools);
-      } catch (err) {
-        alert("Loading carpools failed" + err);
-      }
-    };
-    loadData();
-  }, [user.sub]);
-
+const CarpoolSearchList = ({ carpools, onBookClick }) => {
   const displayCardList = () => {
     return carpools.map((carpool) => {
       return (
@@ -111,7 +37,7 @@ const CarpoolSearchList = () => {
               <Button
                 variant="primary"
                 type="button"
-                onClick={() => handleShowModal(carpool)}
+                onClick={() => onBookClick(carpool)}
               >
                 Book
               </Button>
@@ -121,20 +47,7 @@ const CarpoolSearchList = () => {
       );
     });
   };
-  return (
-    <div>
-      {displayCardList()}
-
-      <ConfirmationDialogSimple
-        showModal={showModal}
-        onCancelClick={handleCloseModal}
-        onConfirmClick={onBookClick}
-        title="Confirm Booking"
-        body="Are you sure you want to book this carpool?"
-      />
-      <ToastContainer />
-    </div>
-  );
+  return <div>{displayCardList()}</div>;
 };
 
 export default CarpoolSearchList;
