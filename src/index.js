@@ -7,13 +7,17 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import Auth0ProviderWithHistory from "./components/auth/AuthProviderWithHistory";
+import { Provider } from "react-redux";
+import store from "./redux/store";
 
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <Auth0ProviderWithHistory>
-        <App />
-      </Auth0ProviderWithHistory>
+      <Provider store={store}>
+        <Auth0ProviderWithHistory>
+          <App />
+        </Auth0ProviderWithHistory>
+      </Provider>
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById("root")

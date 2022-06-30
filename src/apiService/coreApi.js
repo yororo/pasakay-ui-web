@@ -1,9 +1,28 @@
+// TODO: move some services to a core service - generic of datasource
+// coreApi should only return actual data and then the "coreService" will be the one to process it and do validations (i.e. business logic)
 import { handleResponse, handleError } from "./apiUtils";
 const baseUrl = process.env.REACT_APP_API_URL + "/carpools";
 
 export async function getCarpools() {
   console.log(baseUrl);
   return await fetch(baseUrl).then(handleResponse).catch(handleError);
+}
+
+export async function getCarpoolsAvailableForBooking(userId) {
+  // TODO: move filtering in API instead to lessen throughput
+  console.log(baseUrl);
+  const allCarpools = await fetch(baseUrl)
+    .then(handleResponse)
+    .catch(handleError);
+
+  return allCarpools.filter((carpool) => {
+    return (
+      carpool.status === "Open" &&
+      !carpool.registeredPassengers.some(
+        (passenger) => passenger.passengerId === userId
+      )
+    );
+  });
 }
 
 export async function getCarpoolsByDriverId(driverId) {
