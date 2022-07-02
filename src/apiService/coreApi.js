@@ -33,6 +33,14 @@ export async function getCarpoolsByDriverId(driverId) {
     .catch(handleError);
 }
 
+export async function getCarpoolById(carpoolId) {
+  console.log(baseUrl);
+  // WARN: improve security?
+  return await fetch(`${baseUrl}?carpoolId=${carpoolId}`)
+    .then(handleResponse)
+    .catch(handleError);
+}
+
 export async function getBookings(userId) {
   const carpools = await fetch(baseUrl).then(handleResponse).catch(handleError);
   const userBookings = carpools.filter((carpool) =>

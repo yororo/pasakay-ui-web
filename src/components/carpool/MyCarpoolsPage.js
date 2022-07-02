@@ -1,15 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MyCarpoolsList from "./MyCarpoolsList";
 import { Button, Form, Modal } from "react-bootstrap";
-import { createNewCarpool } from "../../apiService/coreApi";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useSelector, useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  addCarpool,
+  deleteCarpool,
+  loadCarpoolsByDriverId,
+  selectMyCarpools,
+} from "../../redux/slice/carpool/carpoolSlice";
 
 const MyCarpools = () => {
   const { user } = useAuth0();
+  const myCarpools = useSelector((state) => selectMyCarpools(state, user.sub));
+  const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [newCarpool, setNewCarpool] = useState({});
+
+  const onCancelCarpoolClick = async (carpoolToDelete) => {
+    try {
+      console.log(
+        `Deleting carpool ${carpoolToDelete?.carpoolName} - ${user.sub}:${user.name}`
+      );
+      dispatch(deleteCarpool(carpoolToDelete.carpoolId));
+      toast.success(`Carpool deleted 👍`);
+    } catch (err) {
+      toast.error(`Deleting carpool failed 😧`);
+      console.log(
+        `Deleting carpool for ${carpoolToDelete?.carpoolName} failed! Error: ${err}`
+      );
+    }
+  };
+
+  useEffect(() => {
+    dispatch(loadCarpoolsByDriverId(user.sub));
+  }, [dispatch, user.sub]);
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -23,10 +50,15 @@ const MyCarpools = () => {
 
     try {
       console.log(`Creating new carpool: ${Object.values(newCarpool)}`);
-      await createNewCarpool(newCarpool, {
-        name: user.name,
-        userId: user.sub,
-      });
+      dispatch(
+        addCarpool({
+          carpool: newCarpool,
+          user: {
+            name: user.name,
+            userId: user.sub,
+          },
+        })
+      );
       toast.success(`Carpool created 🔥`);
     } catch (err) {
       toast.error(`Creating new carpool failed 😧`);
@@ -54,7 +86,10 @@ const MyCarpools = () => {
           </Button>
         </div>
       </div>
-      <MyCarpoolsList />
+      <MyCarpoolsList
+        carpools={myCarpools}
+        onCancelCarpoolClick={onCancelCarpoolClick}
+      />
 
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>

@@ -1,20 +1,22 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Container, FloatingLabel, Form, Row } from "react-bootstrap";
 import CarpoolSearchList from "./CarpoolSearchList";
 import { useSelector, useDispatch } from "react-redux";
-import { loadCarpools } from "../../redux/slice/carpool/carpoolSlice";
 import {
+  loadCarpoolsForBooking,
   bookCarpool,
-  getCarpoolsAvailableForBooking,
-} from "../../apiService/coreApi";
+  selectCarpoolsForBooking,
+} from "../../redux/slice/carpool/carpoolSlice";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
 
 const CarpoolSearchPage = () => {
-  const carpools = useSelector((state) => state.carpool);
   const { user } = useAuth0();
+  const carpools = useSelector((state) =>
+    selectCarpoolsForBooking(state, user.sub)
+  );
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [carpoolToBook, setCarpoolToBook] = useState({});
@@ -31,12 +33,15 @@ const CarpoolSearchPage = () => {
   const onConfirmBookClick = async () => {
     try {
       console.log(`Booking carpool ${carpoolToBook?.carpoolName}`);
-      await bookCarpool(carpoolToBook, {
-        userId: user.sub,
-        name: user.name,
-      });
-      // TODO: double check if useCallback has unintended implications if called outside useEffect();
-      loadData();
+      dispatch(
+        bookCarpool({
+          carpool: carpoolToBook,
+          user: {
+            name: user.name,
+            userId: user.sub,
+          },
+        })
+      );
       toast.success(`You're now booked at ${carpoolToBook?.carpoolName} 🔥`);
     } catch (err) {
       toast.error(`Booking failed for ${carpoolToBook?.carpoolName} 😧`);
@@ -52,14 +57,9 @@ const CarpoolSearchPage = () => {
     handleShowModal(carpoolToBook);
   };
 
-  const loadData = useCallback(async () => {
-    const carpools = await getCarpoolsAvailableForBooking(user.sub);
-    dispatch(loadCarpools(carpools));
-  }, [dispatch, user.sub]);
-
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    dispatch(loadCarpoolsForBooking(user.sub));
+  }, [dispatch, user]);
 
   return (
     <div>
@@ -100,7 +100,7 @@ const CarpoolSearchPage = () => {
       </Container>
 
       <div className="mt-4">
-        <CarpoolSearchList carpools={carpools.all} onBookClick={onBookClick} />
+        <CarpoolSearchList carpools={carpools} onBookClick={onBookClick} />
         <ConfirmationDialogSimple
           showModal={showModal}
           onCancelClick={handleCloseModal}

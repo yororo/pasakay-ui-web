@@ -1,55 +1,21 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, Card } from "react-bootstrap";
-import { deleteCarpool, getCarpoolsByDriverId } from "../../apiService/coreApi";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const MyCarpoolsList = () => {
-  const { user } = useAuth0();
-  const [carpools, setCarpools] = useState([]);
+const MyCarpoolsList = ({ carpools, onCancelCarpoolClick }) => {
   const [showModal, setShowModal] = useState(false);
   const [carpoolToDelete, setCarpoolToDelete] = useState({});
 
   const handleCloseModal = () => {
     setShowModal(false);
     setCarpoolToDelete({});
-    console.log(carpoolToDelete);
   };
   const handleShowModal = (carpool) => {
     setShowModal(true);
     setCarpoolToDelete(carpool);
-  };
-
-  const onDeleteCarpoolClick = async () => {
-    try {
-      console.log(
-        `Deleting carpool ${carpoolToDelete?.carpoolName} - ${user.sub}:${user.name}`
-      );
-      await deleteCarpool(carpoolToDelete.carpoolId);
-      toast.success(`Carpool deleted 👍`);
-    } catch (err) {
-      toast.error(`Deleting carpool failed 😧`);
-      console.log(
-        `Deleting carpool for ${carpoolToDelete?.carpoolName} failed! Error: ${err}`
-      );
-    } finally {
-      setShowModal(false);
-    }
-
-    await loadCarpools();
-  };
-
-  const loadCarpools = async () => {
-    try {
-      const carpools = await getCarpoolsByDriverId(user.sub);
-      setCarpools(carpools);
-      console.log(carpools);
-    } catch (err) {
-      alert("Loading my carpools failed" + err);
-    }
   };
 
   const displayCardList = () => {
@@ -98,24 +64,15 @@ const MyCarpoolsList = () => {
     });
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const carpools = await getCarpoolsByDriverId(user.sub);
-        setCarpools(carpools);
-      } catch (err) {
-        alert("Loading my carpools failed" + err);
-      }
-    };
-    loadData();
-  }, [user.sub]);
-
   return (
     <div>
       <ConfirmationDialogSimple
         showModal={showModal}
         onCancelClick={handleCloseModal}
-        onConfirmClick={onDeleteCarpoolClick}
+        onConfirmClick={() => {
+          onCancelCarpoolClick(carpoolToDelete);
+          handleCloseModal();
+        }}
         title="Confirm Delete"
         body="Are you sure you want to delete this carpool?"
       />
