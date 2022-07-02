@@ -52,9 +52,6 @@ export const carpoolSlice = createSlice({
         state.all = state.all.filter(
           (carpool) => carpool.carpoolId !== action.payload
         );
-        state.myCarpools = state.myCarpools.filter(
-          (carpool) => carpool.carpoolId !== action.payload
-        );
       })
       .addCase(addCarpool.fulfilled, (state, action) => {
         state.all = [...state.all, action.payload];
@@ -112,6 +109,7 @@ export const selectCarpoolsForBooking = (state, userId) =>
   state.carpool.all.filter((carpool) => {
     return (
       carpool.status === "Open" &&
+      carpool.driverId !== userId &&
       !carpool.registeredPassengers.some(
         (passenger) => passenger.passengerId === userId
       )
