@@ -23,7 +23,7 @@ const NavUserProfile = () => {
         menuVariant="dark"
       >
         <NavDropdown.Item>
-          <LinkContainer className="justify-content-left" to="/profile">
+          <LinkContainer to="/profile">
             <div>Profile</div>
           </LinkContainer>
         </NavDropdown.Item>

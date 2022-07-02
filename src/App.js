@@ -14,26 +14,27 @@ function App() {
   return (
     <>
       <div>
-        <Navbar bg="dark" variant="dark" className="px-3">
+        <Navbar bg="dark" variant="dark" className="px-3" expand="lg">
           <LinkContainer to="/">
             <Navbar.Brand>🚗 Pasakay</Navbar.Brand>
           </LinkContainer>
-          <Nav className="me-auto">
-            <LinkContainer to="/carpools">
-              <Nav.Link>Search</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to="/mycarpools">
-              <Nav.Link>My Carpools</Nav.Link>
-            </LinkContainer>
-            <LinkContainer to="/bookings">
-              <Nav.Link>My Bookings</Nav.Link>
-            </LinkContainer>
-          </Nav>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <LinkContainer to="/carpools">
+                <Nav.Link>Search</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/mycarpools">
+                <Nav.Link>My Carpools</Nav.Link>
+              </LinkContainer>
+              <LinkContainer to="/bookings">
+                <Nav.Link>My Bookings</Nav.Link>
+              </LinkContainer>
+            </Nav>
 
-          <Navbar.Collapse className="justify-content-end">
-            <Navbar.Text>
+            <Nav className="">
               <NavUserProfile />
-            </Navbar.Text>
+            </Nav>
           </Navbar.Collapse>
         </Navbar>
       </div>
