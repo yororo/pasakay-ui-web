@@ -1,5 +1,5 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import AlertWarningMessageSimple from "../common/AlertWarningMessageSimple";
 
 const Home = () => {
   return (
@@ -11,6 +11,9 @@ const Home = () => {
       <div>🌟 Manage your own carpools</div>
       <div>🌟 Manage your booked carpools</div>
       <div>🌟 View your profile</div>
+      <div className="mt-5">
+        <AlertWarningMessageSimple message="⚠️ This site is currently in-progress. Some features may not work properly." />
+      </div>
     </div>
   );
 };
