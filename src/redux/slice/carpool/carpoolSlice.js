@@ -2,12 +2,22 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {
   bookCarpool as bookCarpoolApi,
   deleteCarpool as deleteCarpoolApi,
+  deleteBooking as deleteBookingApi,
   getCarpoolsAvailableForBooking,
   getCarpoolsByDriverId,
   createNewCarpool,
+  getBookings,
 } from "../../../apiService/coreApi";
+import {
+  LOADING_STATUS_IDLE,
+  LOADING_STATUS_PENDING,
+} from "../../model/loadingStatus";
 
-const initialState = { all: [] };
+const initialState = {
+  all: [],
+  loadingStatus: LOADING_STATUS_IDLE,
+  error: null,
+};
 export const carpoolSlice = createSlice({
   name: "carpool",
   initialState,
@@ -24,10 +34,22 @@ export const carpoolSlice = createSlice({
   },
   extraReducers(builder) {
     builder
+      /**
+       * loadCarpoolsForBooking
+       */
       .addCase(loadCarpoolsForBooking.fulfilled, (state, action) => {
-        state.all = [];
-        state.all = state.all.concat(action.payload);
+        if (state.loadingStatus === LOADING_STATUS_PENDING) {
+          state.loadingStatus = LOADING_STATUS_IDLE;
+          state.all = [];
+          state.all = state.all.concat(action.payload);
+          state.error = null;
+        }
       })
+      .addCase(loadCarpoolsForBooking.pending, handlePendingCase)
+      .addCase(loadCarpoolsForBooking.rejected, handleRejectedCase)
+      /**
+       * bookCarpool
+       */
       .addCase(bookCarpool.fulfilled, (state, action) => {
         state.all = state.all.map((carpool) => {
           if (carpool.carpoolId === action.payload.carpoolId) {
@@ -37,27 +59,87 @@ export const carpoolSlice = createSlice({
           return carpool;
         });
       })
+      /**
+       * loadCarpoolsByDriverId
+       */
       .addCase(loadCarpoolsByDriverId.fulfilled, (state, action) => {
-        action.payload.forEach((carpool) => {
-          if (
-            !state.all.find(
-              (carpoolInState) => carpool.carpoolId === carpoolInState.carpoolId
-            )
-          ) {
-            state.all.push(carpool);
-          }
-        });
+        if (state.loadingStatus === LOADING_STATUS_PENDING) {
+          state.loadingStatus = LOADING_STATUS_IDLE;
+          state.error = null;
+
+          mergeCarpoolLists(action.payload, state.all);
+        }
       })
+      .addCase(loadCarpoolsByDriverId.pending, handlePendingCase)
+      .addCase(loadCarpoolsByDriverId.rejected, handleRejectedCase)
+      /**
+       * loadCarpoolsByPassengerId
+       */
+      .addCase(loadCarpoolsByPassengerId.fulfilled, (state, action) => {
+        if (state.loadingStatus === LOADING_STATUS_PENDING) {
+          state.loadingStatus = LOADING_STATUS_IDLE;
+          state.error = null;
+
+          mergeCarpoolLists(action.payload, state.all);
+        }
+      })
+      .addCase(loadCarpoolsByPassengerId.pending, handlePendingCase)
+      .addCase(loadCarpoolsByPassengerId.rejected, handleRejectedCase)
+      /**
+       * deleteCarpool
+       */
       .addCase(deleteCarpool.fulfilled, (state, action) => {
         state.all = state.all.filter(
           (carpool) => carpool.carpoolId !== action.payload
         );
+        state.error = null;
       })
+      /**
+       * deleteBooking
+       */
+      .addCase(deleteBooking.fulfilled, (state, action) => {
+        state.all = state.all.map((carpool) => {
+          if (carpool.carpoolId === action.payload.carpoolId) {
+            // return updated carpool from API call
+            return action.payload;
+          }
+          return carpool;
+        });
+      })
+      /**
+       * addCarpool
+       */
       .addCase(addCarpool.fulfilled, (state, action) => {
         state.all = [...state.all, action.payload];
+        state.error = null;
       });
   },
 });
+
+const handleRejectedCase = (state, action) => {
+  if (state.loadingStatus === LOADING_STATUS_PENDING) {
+    state.loadingStatus = LOADING_STATUS_IDLE;
+    state.error = action.error;
+  }
+};
+
+const handlePendingCase = (state, action) => {
+  if (state.loadingStatus === LOADING_STATUS_IDLE) {
+    state.loadingStatus = LOADING_STATUS_PENDING;
+  }
+};
+
+const mergeCarpoolLists = (fromCarpools, toCarpools) => {
+  fromCarpools.forEach((carpool) => {
+    if (
+      !toCarpools.find(
+        (carpoolInState) => carpool.carpoolId === carpoolInState.carpoolId
+      )
+    ) {
+      toCarpools.push(carpool);
+    }
+  });
+};
 
 /**
  * ASYNC CALLS
@@ -70,14 +152,6 @@ export const loadCarpoolsForBooking = createAsyncThunk(
   }
 );
 
-export const bookCarpool = createAsyncThunk(
-  "carpool/bookCarpool",
-  async ({ carpool, user }) => {
-    const bookedCarpool = await bookCarpoolApi(carpool, user);
-    return bookedCarpool;
-  }
-);
-
 export const loadCarpoolsByDriverId = createAsyncThunk(
   "carpool/loadMyCarpools",
   async (userId) => {
@@ -86,11 +160,33 @@ export const loadCarpoolsByDriverId = createAsyncThunk(
   }
 );
 
+export const loadCarpoolsByPassengerId = createAsyncThunk(
+  "carpool/loadCarpoolsByPassengerId",
+  async (userId) => {
+    const carpools = await getBookings(userId);
+    return carpools;
+  }
+);
+export const bookCarpool = createAsyncThunk(
+  "carpool/bookCarpool",
+  async ({ carpool, user }) => {
+    const bookedCarpool = await bookCarpoolApi(carpool, user);
+    return bookedCarpool;
+  }
+);
+
 export const deleteCarpool = createAsyncThunk(
   "carpool/deleteCarpool",
   async (carpoolId) => {
     await deleteCarpoolApi(carpoolId);
     return carpoolId;
+  }
+);
+
+export const deleteBooking = createAsyncThunk(
+  "carpool/deleteBooking",
+  async ({ carpool, user }) => {
+    return await deleteBookingApi(carpool, user);
   }
 );
 
@@ -118,6 +214,14 @@ export const selectCarpoolsForBooking = (state, userId) =>
 
 export const selectMyCarpools = (state, userId) => {
   return state.carpool.all.filter((carpool) => carpool.driverId === userId);
+};
+
+export const selectMyBookedCarpools = (state, userId) => {
+  return state.carpool.all.filter((carpool) =>
+    carpool.registeredPassengers.some(
+      (passenger) => passenger.passengerId === userId
+    )
+  );
 };
 
 export const { updateCarpool } = carpoolSlice.actions;

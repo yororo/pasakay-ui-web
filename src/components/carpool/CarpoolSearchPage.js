@@ -11,12 +11,21 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
+import {
+  LOADING_STATUS_IDLE,
+  LOADING_STATUS_PENDING,
+} from "../../redux/model/loadingStatus";
+import AlertErrorMessageSimple from "../common/AlertErrorMessageSimple";
+import SpinnerLoadingSimple from "../common/SpinnerLoadingSimple";
+import AlertInfoMessageSimple from "../common/AlertInfoMessageSimple";
 
 const CarpoolSearchPage = () => {
   const { user } = useAuth0();
   const carpools = useSelector((state) =>
     selectCarpoolsForBooking(state, user.sub)
   );
+
+  const { loadingStatus, error } = useSelector((state) => state.carpool);
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [carpoolToBook, setCarpoolToBook] = useState({});
@@ -61,12 +70,8 @@ const CarpoolSearchPage = () => {
     dispatch(loadCarpoolsForBooking(user.sub));
   }, [dispatch, user]);
 
-  return (
-    <div>
-      <div>
-        <h2>Search Carpools</h2>
-      </div>
-
+  const displayFilters = () => {
+    return (
       <Container>
         <Row>
           <Col>
@@ -98,17 +103,47 @@ const CarpoolSearchPage = () => {
           </Col>
         </Row>
       </Container>
+    );
+  };
 
-      <div className="mt-4">
-        <CarpoolSearchList carpools={carpools} onBookClick={onBookClick} />
-        <ConfirmationDialogSimple
-          showModal={showModal}
-          onCancelClick={handleCloseModal}
-          onConfirmClick={onConfirmBookClick}
-          title="Confirm Booking"
-          body="Are you sure you want to book this carpool?"
-        />
+  const displayCarpoolList = () => {
+    if (loadingStatus === LOADING_STATUS_PENDING) {
+      return (
+        <div className="text-center">
+          <SpinnerLoadingSimple />
+        </div>
+      );
+    } else if (loadingStatus === LOADING_STATUS_IDLE && error !== null) {
+      return <AlertErrorMessageSimple />;
+    } else if (loadingStatus === LOADING_STATUS_IDLE && carpools.length === 0) {
+      return (
+        <AlertInfoMessageSimple message="No carpools found. Have you tried using a different filter? 😊" />
+      );
+    }
+
+    return (
+      <>
+        {displayFilters()}
+        <div className="mt-4">
+          <CarpoolSearchList carpools={carpools} onBookClick={onBookClick} />
+        </div>
+      </>
+    );
+  };
+
+  return (
+    <div>
+      <div>
+        <h2>Search Carpools</h2>
       </div>
+      {displayCarpoolList()}
+      <ConfirmationDialogSimple
+        showModal={showModal}
+        onCancelClick={handleCloseModal}
+        onConfirmClick={onConfirmBookClick}
+        title="Confirm Booking"
+        body="Are you sure you want to book this carpool?"
+      />
       <ToastContainer />
     </div>
   );

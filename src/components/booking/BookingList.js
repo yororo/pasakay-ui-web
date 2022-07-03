@@ -1,15 +1,10 @@
 import moment from "moment";
 import { Button, Card } from "react-bootstrap";
-import React, { useEffect, useState } from "react";
-import { deleteBooking, getBookings } from "../../apiService/coreApi";
+import React, { useState } from "react";
 import ConfirmationDialogSimple from "../common/ConfirmationDialogSimple";
-import { useAuth0 } from "@auth0/auth0-react";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const BookingList = () => {
-  const { user } = useAuth0();
-  const [bookings, setBookings] = useState([]);
+const BookingList = ({ carpools, onCancelBookingClick }) => {
   const [showModal, setShowModal] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState({});
 
@@ -22,39 +17,8 @@ const BookingList = () => {
     setBookingToDelete(booking);
   };
 
-  const onDeleteBookingClick = async () => {
-    try {
-      console.log(
-        `Booking cancellation for ${bookingToDelete?.carpoolName} - ${user.sub}:${user.name}`
-      );
-      await deleteBooking(bookingToDelete, { userId: user.sub });
-      toast.success(`Booking cancelled 👍`);
-    } catch (err) {
-      toast.error(`Booking cancellation failed 😧`);
-      console.log(
-        `Booking cancellation for ${bookingToDelete?.carpoolName} failed! Error: ${err}`
-      );
-    } finally {
-      setShowModal(false);
-    }
-
-    try {
-      const bookings = await getBookings(user.sub);
-      setBookings(bookings);
-    } catch (err) {
-      console.log(`Error when loading bookings after a cancellation: ${err}`);
-    }
-  };
-  useEffect(() => {
-    const loadData = async () => {
-      const bookings = await getBookings(user.sub);
-      setBookings(bookings);
-    };
-    loadData();
-  }, [user.sub]);
-
   const displayBookings = () => {
-    return bookings.map((booking) => {
+    return carpools.map((booking) => {
       return (
         <div className="my-3" key={booking.carpoolId}>
           <Card>
@@ -106,11 +70,13 @@ const BookingList = () => {
       <ConfirmationDialogSimple
         showModal={showModal}
         onCancelClick={handleCloseModal}
-        onConfirmClick={onDeleteBookingClick}
+        onConfirmClick={() => {
+          onCancelBookingClick(bookingToDelete);
+          handleCloseModal();
+        }}
         title="Confirm Cancellation"
         body="Are you sure you want to cancel this booking?"
       />
-      <ToastContainer />
     </div>
   );
 };

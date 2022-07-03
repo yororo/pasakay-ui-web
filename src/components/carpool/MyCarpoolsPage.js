@@ -11,10 +11,18 @@ import {
   loadCarpoolsByDriverId,
   selectMyCarpools,
 } from "../../redux/slice/carpool/carpoolSlice";
+import {
+  LOADING_STATUS_IDLE,
+  LOADING_STATUS_PENDING,
+} from "../../redux/model/loadingStatus";
+import AlertErrorMessageSimple from "../common/AlertErrorMessageSimple";
+import SpinnerLoadingSimple from "../common/SpinnerLoadingSimple";
+import AlertInfoMessageSimple from "../common/AlertInfoMessageSimple";
 
 const MyCarpools = () => {
   const { user } = useAuth0();
   const myCarpools = useSelector((state) => selectMyCarpools(state, user.sub));
+  const { loadingStatus, error } = useSelector((state) => state.carpool);
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [newCarpool, setNewCarpool] = useState({});
@@ -74,23 +82,36 @@ const MyCarpools = () => {
     setNewCarpool((values) => ({ ...values, [name]: value }));
   };
 
-  return (
-    <>
-      <div className="d-flex justify-content-between">
-        <div className="p-2">
-          <h2>My Carpools</h2>
+  const displayMyCarpoolList = () => {
+    if (loadingStatus === LOADING_STATUS_PENDING) {
+      return (
+        <div className="text-center">
+          <SpinnerLoadingSimple />
         </div>
-        <div className="p-2">
-          <Button variant="primary" type="button" onClick={handleShowModal}>
-            New
-          </Button>
-        </div>
-      </div>
-      <MyCarpoolsList
-        carpools={myCarpools}
-        onCancelCarpoolClick={onCancelCarpoolClick}
-      />
+      );
+    } else if (loadingStatus === LOADING_STATUS_IDLE && error !== null) {
+      return <AlertErrorMessageSimple />;
+    } else if (
+      loadingStatus === LOADING_STATUS_IDLE &&
+      myCarpools.length === 0
+    ) {
+      return (
+        <AlertInfoMessageSimple message="You have no created carpools. Create one now! 😊" />
+      );
+    }
 
+    return (
+      <>
+        <MyCarpoolsList
+          carpools={myCarpools}
+          onCancelCarpoolClick={onCancelCarpoolClick}
+        />
+      </>
+    );
+  };
+
+  const displayNewCarpoolModal = () => {
+    return (
       <Modal show={showModal} onHide={handleCloseModal} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>New Carpool</Modal.Title>
@@ -217,6 +238,24 @@ const MyCarpools = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+    );
+  };
+
+  return (
+    <>
+      <div className="d-flex justify-content-between">
+        <div className="p-2">
+          <h2>My Carpools</h2>
+        </div>
+        <div className="p-2">
+          <Button variant="primary" type="button" onClick={handleShowModal}>
+            New
+          </Button>
+        </div>
+      </div>
+
+      {displayMyCarpoolList()}
+      {displayNewCarpoolModal()}
       <ToastContainer />
     </>
   );
