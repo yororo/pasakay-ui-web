@@ -8,10 +8,11 @@ export async function getCarpools() {
   return await fetch(baseUrl).then(handleResponse).catch(handleError);
 }
 
-export async function getCarpoolsAvailableForBooking(userId) {
+export async function getCarpoolsAvailableForBooking(userId, pickUpDate) {
   // TODO: move filtering in API instead to lessen throughput
   console.log(baseUrl);
-  const allCarpools = await fetch(baseUrl)
+  console.log("TODO: ", pickUpDate);
+  const allCarpools = await fetch(`${baseUrl}?Status=Open`)
     .then(handleResponse)
     .catch(handleError);
 

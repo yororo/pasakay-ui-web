@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Col, Container, FloatingLabel, Form, Row } from "react-bootstrap";
+import React, { forwardRef, useEffect, useState } from "react";
+import { Col, Container, Form, Row } from "react-bootstrap";
 import CarpoolSearchList from "./CarpoolSearchList";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -18,17 +18,21 @@ import {
 import AlertErrorMessageSimple from "../common/AlertErrorMessageSimple";
 import SpinnerLoadingSimple from "../common/SpinnerLoadingSimple";
 import AlertInfoMessageSimple from "../common/AlertInfoMessageSimple";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const CarpoolSearchPage = () => {
   const { user } = useAuth0();
+  const dispatch = useDispatch();
   const carpools = useSelector((state) =>
     selectCarpoolsForBooking(state, user.sub)
   );
-
   const { loadingStatus, error } = useSelector((state) => state.carpool);
-  const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [carpoolToBook, setCarpoolToBook] = useState({});
+  const [pickUpDate, setPickUpDate] = useState(new Date());
+  // const [pickUpLocation, setPickUpLocation] = useState("");
+  // const [dropOffLocation, setDropOffLocation] = useState("");
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -67,39 +71,41 @@ const CarpoolSearchPage = () => {
   };
 
   useEffect(() => {
-    dispatch(loadCarpoolsForBooking(user.sub));
-  }, [dispatch, user]);
+    dispatch(loadCarpoolsForBooking(user.sub, pickUpDate));
+  }, [dispatch, user, pickUpDate]);
+
+  const DateInput = forwardRef(({ value, onClick }, ref) => (
+    <Form.Control
+      id="dateFilter"
+      type="text"
+      onClick={onClick}
+      onChange={() => {}} // TODO: just to suppress react warning that form field has no onChange even though it's not readonly
+      ref={ref}
+      value={value}
+    />
+  ));
 
   const displayFilters = () => {
     return (
       <Container>
         <Row>
-          <Col>
-            <FloatingLabel
-              controlId="floatingInput"
-              label="Filter by date and time"
-              className="mb-3"
-            >
-              <Form.Control type="text" placeholder="2022-01-01" />
-            </FloatingLabel>
+          <Col xs={12} md={4} className="mt-2">
+            <Form.Label htmlFor="dateFilter">📅 Date</Form.Label>
+            <DatePicker
+              selected={pickUpDate}
+              onChange={(date) => setPickUpDate(date)}
+              showTimeSelect
+              dateFormat="MMMM d, yyyy h:mm aa"
+              customInput={<DateInput />}
+            />
           </Col>
-          <Col>
-            <FloatingLabel
-              controlId="floatingInput"
-              label="Filter by pick-up location"
-              className="mb-3"
-            >
-              <Form.Control type="text" placeholder="SM Megamall, Ortigas" />
-            </FloatingLabel>
+          <Col xs={12} md={4} className="mt-2">
+            <Form.Label htmlFor="pickUpFilter">📍 From</Form.Label>
+            <Form.Control type="text" placeholder="Ex: 'SM Megamall Ortigas'" />
           </Col>
-          <Col>
-            <FloatingLabel
-              controlId="floatingInput"
-              label="Filter by drop-off location"
-              className="mb-3"
-            >
-              <Form.Control type="text" placeholder="NEX Tower, Makati" />
-            </FloatingLabel>
+          <Col xs={12} md={4} className="mt-2">
+            <Form.Label htmlFor="dropOffFilter">📍 To</Form.Label>
+            <Form.Control type="text" placeholder="Ex: 'Glorietta Makati'" />
           </Col>
         </Row>
       </Container>

@@ -146,8 +146,8 @@ const mergeCarpoolLists = (fromCarpools, toCarpools) => {
  */
 export const loadCarpoolsForBooking = createAsyncThunk(
   "carpool/loadCarpoolsForBooking",
-  async (userId) => {
-    const carpools = await getCarpoolsAvailableForBooking(userId);
+  async (userId, pickUpDate) => {
+    const carpools = await getCarpoolsAvailableForBooking(userId, pickUpDate);
     return carpools;
   }
 );
