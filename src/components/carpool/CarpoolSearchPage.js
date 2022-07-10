@@ -71,7 +71,9 @@ const CarpoolSearchPage = () => {
   };
 
   useEffect(() => {
-    dispatch(loadCarpoolsForBooking(user.sub, pickUpDate));
+    dispatch(
+      loadCarpoolsForBooking({ userId: user.sub, pickUpDate: pickUpDate })
+    );
   }, [dispatch, user, pickUpDate]);
 
   const DateInput = forwardRef(({ value, onClick }, ref) => (
@@ -123,7 +125,11 @@ const CarpoolSearchPage = () => {
       return <AlertErrorMessageSimple />;
     } else if (loadingStatus === LOADING_STATUS_IDLE && carpools.length === 0) {
       return (
-        <AlertInfoMessageSimple message="No carpools found. Have you tried using a different filter? 😊" />
+        <>
+          {displayFilters()}
+          <br />
+          <AlertInfoMessageSimple message="No carpools found. Have you tried using a different filter? 😊 (TEST ONLY: try Nov. 16, 2022 6:00 PM)" />
+        </>
       );
     }
 
