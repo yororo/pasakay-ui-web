@@ -153,7 +153,7 @@ const CarpoolSearchPage = () => {
         <>
           {displayFilters()}
           <br />
-          <AlertInfoMessageSimple message="No carpools found. Have you tried using a different filter? 😊 (TEST ONLY: try Nov. 16, 2022 6:00 PM)" />
+          <AlertInfoMessageSimple message="No carpools found. Have you tried using a different filter? 😊" />
         </>
       );
     }
