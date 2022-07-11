@@ -24,15 +24,20 @@ import "react-datepicker/dist/react-datepicker.css";
 const CarpoolSearchPage = () => {
   const { user } = useAuth0();
   const dispatch = useDispatch();
-  const carpools = useSelector((state) =>
-    selectCarpoolsForBooking(state, user.sub)
-  );
   const { loadingStatus, error } = useSelector((state) => state.carpool);
   const [showModal, setShowModal] = useState(false);
   const [carpoolToBook, setCarpoolToBook] = useState({});
   const [pickUpDate, setPickUpDate] = useState(new Date());
-  // const [pickUpLocation, setPickUpLocation] = useState("");
-  // const [dropOffLocation, setDropOffLocation] = useState("");
+  const [pickUpLocation, setPickUpLocation] = useState("");
+  const [dropOffLocation, setDropOffLocation] = useState("");
+  const carpools = useSelector((state) => {
+    return selectCarpoolsForBooking(
+      state,
+      user.sub,
+      pickUpLocation,
+      dropOffLocation
+    );
+  });
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -41,6 +46,14 @@ const CarpoolSearchPage = () => {
   const handleShowModal = (carpool) => {
     setShowModal(true);
     setCarpoolToBook(carpool);
+  };
+
+  const handleOnPickUpLocationFilterChange = (value) => {
+    setPickUpLocation(value);
+  };
+
+  const handleOnDropOffLocationFilterChange = (value) => {
+    setDropOffLocation(value);
   };
 
   const onConfirmBookClick = async () => {
@@ -103,11 +116,23 @@ const CarpoolSearchPage = () => {
           </Col>
           <Col xs={12} md={4} className="mt-2">
             <Form.Label htmlFor="pickUpFilter">📍 From</Form.Label>
-            <Form.Control type="text" placeholder="Ex: 'SM Megamall Ortigas'" />
+            <Form.Control
+              type="text"
+              placeholder="Ex: 'SM Megamall Ortigas'"
+              onChange={(e) =>
+                handleOnPickUpLocationFilterChange(e.target.value)
+              }
+            />
           </Col>
           <Col xs={12} md={4} className="mt-2">
             <Form.Label htmlFor="dropOffFilter">📍 To</Form.Label>
-            <Form.Control type="text" placeholder="Ex: 'Glorietta Makati'" />
+            <Form.Control
+              type="text"
+              placeholder="Ex: 'Glorietta Makati'"
+              onChange={(e) =>
+                handleOnDropOffLocationFilterChange(e.target.value)
+              }
+            />
           </Col>
         </Row>
       </Container>

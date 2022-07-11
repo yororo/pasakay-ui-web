@@ -13,8 +13,6 @@ export async function getCarpools() {
 export async function getCarpoolsAvailableForBooking(userId, pickUpDate) {
   // TODO: move filtering in API instead to lessen throughput
   console.log(baseUrl);
-  // console.log(moment(pickUpDate).unix());
-  // console.log(moment.unix(1657476622));
   const date = moment(pickUpDate).unix();
   const allCarpools = await fetch(`${baseUrl}?status=Open&pickUpDate=${date}`)
     .then(handleResponse)

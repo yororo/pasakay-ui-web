@@ -12,6 +12,10 @@ import {
   LOADING_STATUS_IDLE,
   LOADING_STATUS_PENDING,
 } from "../../model/loadingStatus";
+import {
+  filterByDropOffLocation,
+  filterByPickUpLocation,
+} from "./carpoolSliceHelper";
 
 const initialState = {
   all: [],
@@ -30,6 +34,29 @@ export const carpoolSlice = createSlice({
         }
         return carpool;
       });
+    },
+    filterCarpool: (state, action) => {
+      const { pickUpLocation, dropOffLocation } = action.payload;
+
+      if (!pickUpLocation && !dropOffLocation) {
+        return;
+      }
+
+      if (pickUpLocation) {
+        state.all = state.all.filter((carpool) =>
+          pickUpLocation
+            .toLowerCase()
+            .includes(carpool.pickUpLocation.toLowerCase())
+        );
+      }
+
+      if (dropOffLocation) {
+        state.all = state.all.filter((carpool) =>
+          dropOffLocation
+            .toLowerCase()
+            .includes(carpool.dropOffLocation.toLowerCase())
+        );
+      }
     },
   },
   extraReducers(builder) {
@@ -201,16 +228,27 @@ export const addCarpool = createAsyncThunk(
 /**
  * SELECTORS
  */
-export const selectCarpoolsForBooking = (state, userId) =>
-  state.carpool.all.filter((carpool) => {
+export const selectCarpoolsForBooking = (
+  state,
+  userId,
+  pickUpLocation,
+  dropOffLocation
+) => {
+  console.log(
+    `selectCarpoolsForBooking START - Filters: '${pickUpLocation}', '${dropOffLocation}'`
+  );
+  return state.carpool.all.filter((carpool) => {
     return (
       carpool.status === "Open" &&
       carpool.driverId !== userId &&
       !carpool.registeredPassengers.some(
         (passenger) => passenger.passengerId === userId
-      )
+      ) &&
+      filterByPickUpLocation(carpool, pickUpLocation) &&
+      filterByDropOffLocation(carpool, dropOffLocation)
     );
   });
+};
 
 export const selectMyCarpools = (state, userId) => {
   return state.carpool.all.filter((carpool) => carpool.driverId === userId);
@@ -224,6 +262,6 @@ export const selectMyBookedCarpools = (state, userId) => {
   );
 };
 
-export const { updateCarpool } = carpoolSlice.actions;
+export const { updateCarpool, filterCarpool } = carpoolSlice.actions;
 
 export default carpoolSlice.reducer;
