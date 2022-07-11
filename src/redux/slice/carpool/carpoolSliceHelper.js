@@ -24,7 +24,7 @@ export const filterByDropOffLocation = (carpool, dropOffLocation) => {
   if (dropOffLocation && dropOffLocation.length > 1) {
     return carpool.dropOffLocation
       .toLowerCase()
-      .trim.includes(dropOffLocation.toLowerCase());
+      .includes(dropOffLocation.toLowerCase());
   }
 
   return true;

@@ -12,7 +12,7 @@ const Home = () => {
       <div>🌟 Manage your booked carpools</div>
       <div>🌟 View your profile</div>
       <div className="mt-5">
-        <AlertWarningMessageSimple message="⚠️ This site is currently in-progress. Some features may not work properly." />
+        <AlertWarningMessageSimple message="This site is currently in-progress. Some features may not work properly." />
       </div>
     </div>
   );
