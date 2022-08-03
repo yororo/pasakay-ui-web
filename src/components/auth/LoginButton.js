@@ -16,7 +16,15 @@ const LoginButton = () => {
 
   const displayLoginButton = () => {
     return (
-      <Button variant="light" type="button" onClick={() => loginWithRedirect()}>
+      <Button
+        variant="light"
+        type="button"
+        onClick={() =>
+          loginWithRedirect({
+            appState: { targetUrl: window.location.pathname },
+          })
+        }
+      >
         Login
       </Button>
     );

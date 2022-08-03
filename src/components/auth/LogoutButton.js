@@ -9,7 +9,9 @@ const LogoutButton = () => {
     <Button
       variant="light"
       type="button"
-      onClick={() => logout({ returnTo: window.location.origin })}
+      onClick={() =>
+        logout({ returnTo: `${window.location.origin}/apps/carpool/` })
+      }
     >
       Log Out
     </Button>

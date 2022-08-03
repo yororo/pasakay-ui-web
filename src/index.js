@@ -12,7 +12,7 @@ import store from "./redux/store";
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/apps/carpool">
       <Provider store={store}>
         <Auth0ProviderWithHistory>
           <App />

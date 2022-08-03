@@ -30,7 +30,9 @@ const NavUserProfile = () => {
         <NavDropdown.Item>Settings</NavDropdown.Item>
         <NavDropdown.Divider />
         <NavDropdown.Item
-          onClick={() => logout({ returnTo: window.location.origin })}
+          onClick={() =>
+            logout({ returnTo: `${window.location.origin}/apps/carpool/` })
+          }
         >
           Logout
         </NavDropdown.Item>
@@ -40,7 +42,15 @@ const NavUserProfile = () => {
 
   const displayLoggedOutUser = () => {
     return (
-      <Button variant="light" type="button" onClick={() => loginWithRedirect()}>
+      <Button
+        variant="light"
+        type="button"
+        onClick={() =>
+          loginWithRedirect({
+            appState: { targetUrl: window.location.pathname },
+          })
+        }
+      >
         Login
       </Button>
     );

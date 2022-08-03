@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pasakay-ui-deployment
+  namespace: pasakay-app
+  labels:
+    app: pasakay-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pasakay-ui
+  template:
+    metadata:
+      namespace: pasakay-app
+      labels:
+        app: pasakay-ui
+    spec:
+      containers:
+        - name: pasakay-ui
+          image: docker.io/syoro/pasakay-app-ui:1.7
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: 64Mi
+              cpu: "0.5"
