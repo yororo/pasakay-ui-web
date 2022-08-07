@@ -9,17 +9,20 @@ const Auth0ProviderWithHistory = ({ children }) => {
   const navigate = useNavigate();
   const onRedirectCallback = (appState) => {
     console.log("appState: ", appState);
-    // TODO: for now always navigate to home page but should find a way to redirect from last visited page
-    // console.log((appState && appState.returnTo) || "/");
-    // navigate((appState && appState.returnTo) || "/");
-    navigate("/");
+    let returnTo = undefined;
+    // TODO: move "/apps/carpool" to an environment variable instead
+    if (appState && appState.returnTo) {
+      returnTo = appState.returnTo.replace("/apps/carpool", "");
+    }
+
+    navigate(returnTo || "/");
   };
 
   return (
     <Auth0Provider
       domain={domain}
       clientId={clientId}
-      redirectUri={window.location.href}
+      redirectUri={`${window.location.origin}/apps/carpool/`}
       onRedirectCallback={onRedirectCallback}
     >
       {children}

@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: pasakay-ui
-          image: docker.io/syoro/pasakay-app-ui:1.7
+          image: docker.io/syoro/pasakay-app-ui:1.8
           ports:
             - containerPort: 80
           resources:

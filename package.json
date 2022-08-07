@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI=false && react-scripts build",
+    "build": "react-scripts build",
     "docker:build:local": "docker build -f docker/Dockerfile -t pasakay-app-ui:1.1 .",
     "docker:build:remote": "docker build -f docker/Dockerfile -t syoro/pasakay-app-ui:1.1 .",
     "docker:push": "docker push syoro/pasakay-app-ui:1.1",

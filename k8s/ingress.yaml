@@ -7,7 +7,7 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-staging"
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     #nginx.ingress.kubernetes.io/app-root: /
-    #nginx.ingress.kubernetes.io/configuration-snippet: rewrite ^(/apps/carpool)$ $1/ redirect;
+    # nginx.ingress.kubernetes.io/configuration-snippet: rewrite ^(/apps/carpool)$ $1/ redirect;
 spec:
   tls:
     - hosts:
@@ -20,7 +20,6 @@ spec:
         paths:
           - pathType: Prefix
             path: /apps/carpool(/|$)(.*)
-            #path: /
             backend:
               service:
                 name: pasakay-ui-service
